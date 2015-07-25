@@ -17,7 +17,6 @@ NSString * const HarpyAppStoreLinkUniversal         = @"http://itunes.apple.com/
 NSString * const HarpyAppStoreLinkCountrySpecific   = @"http://itunes.apple.com/lookup?id=%@&country=%@";
 
 /// i18n/l10n constants
-NSString * const HarpyLanguageArabic                = @"ar";
 NSString * const HarpyLanguageBasque                = @"eu";
 NSString * const HarpyLanguageChineseSimplified     = @"zh-Hans";
 NSString * const HarpyLanguageChineseTraditional    = @"zh-Hant";
@@ -30,15 +29,11 @@ NSString * const HarpyLanguageHebrew                = @"he";
 NSString * const HarpyLanguageItalian               = @"it";
 NSString * const HarpyLanguageJapanese              = @"ja";
 NSString * const HarpyLanguageKorean                = @"ko";
-NSString * const HarpyLanguageLithuanian            = @"he";
-NSString * const HarpyLanguagePolish                = @"pl";
-NSString * const HarpyLanguagePortugueseBrazil      = @"pt";
-NSString * const HarpyLanguagePortuguesePortugal    = @"pt-PT";
+NSString * const HarpyLanguagePortuguese            = @"pt";
 NSString * const HarpyLanguageRussian               = @"ru";
 NSString * const HarpyLanguageSlovenian             = @"sl";
 NSString * const HarpyLanguageSwedish               = @"sv";
 NSString * const HarpyLanguageSpanish               = @"es";
-NSString * const HarpyLanguageThai                  = @"th";
 NSString * const HarpyLanguageTurkish               = @"tr";
 
 @interface Harpy() <UIAlertViewDelegate>
@@ -145,46 +140,85 @@ NSString * const HarpyLanguageTurkish               = @"tr";
     }
     
     // Initialize storeURL with storeString, and create request object
-    NSURL *storeURL = [NSURL URLWithString:storeString];
-    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:storeURL];
+//    NSURL *storeURL = [NSURL URLWithString:storeString];
+//    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:storeURL];
+//    [request setHTTPMethod:@"GET"];
+//
+//    if ([self isDebugEnabled]) {
+//        NSLog(@"[Harpy] storeURL: %@", storeURL);
+//    }
+    
+    NSURL *url = [NSURL URLWithString:@"https://www.getballer.com/api/v3/appversion"];
+    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
     [request setHTTPMethod:@"GET"];
-
+    
     if ([self isDebugEnabled]) {
-        NSLog(@"[Harpy] storeURL: %@", storeURL);
+        NSLog(@"[Harpy] storeURL: %@", url);
     }
     
     NSURLSession *session = [NSURLSession sharedSession];
+//    NSURLSessionDataTask *task = [session dataTaskWithRequest:request
+//                                            completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
+//                                                if ([data length] > 0 && !error) { // Success
+//            
+//                                                    self.appData = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingAllowFragments error:nil];
+//            
+//                                                    if ([self isDebugEnabled]) {
+//                                                        NSLog(@"[Harpy] JSON Results: %@", _appData);
+//                                                    }
+//            
+//                                                    dispatch_async(dispatch_get_main_queue(), ^{
+//                
+//                                                        // Store version comparison date
+//                                                        self.lastVersionCheckPerformedOnDate = [NSDate date];
+//                                                        [[NSUserDefaults standardUserDefaults] setObject:[self lastVersionCheckPerformedOnDate] forKey:HarpyDefaultStoredVersionCheckDate];
+//                                                        [[NSUserDefaults standardUserDefaults] synchronize];
+//                
+//                                                        /**
+//                                                         Current version that has been uploaded to the AppStore.
+//                                                         Used to contain all versions, but now only contains the latest version.
+//                                                         Still returns an instance of NSArray.
+//                                                         */
+//                                                        NSArray *versionsInAppStore = [[self.appData valueForKey:@"results"] valueForKey:@"version"];
+//                
+//                                                        if ([versionsInAppStore count]) {
+//                                                            _currentAppStoreVersion = [versionsInAppStore objectAtIndex:0];
+//                                                            [self checkIfAppStoreVersionIsNewestVersion:_currentAppStoreVersion];
+//                                                        }
+//                                                    });
+//                                                }
+//                                            }];
+    
     NSURLSessionDataTask *task = [session dataTaskWithRequest:request
                                             completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
                                                 if ([data length] > 0 && !error) { // Success
-            
+                                                    
                                                     self.appData = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingAllowFragments error:nil];
-            
+                                                    
                                                     if ([self isDebugEnabled]) {
                                                         NSLog(@"[Harpy] JSON Results: %@", _appData);
                                                     }
-            
+                                                    
                                                     dispatch_async(dispatch_get_main_queue(), ^{
-                
+                                                        
                                                         // Store version comparison date
                                                         self.lastVersionCheckPerformedOnDate = [NSDate date];
                                                         [[NSUserDefaults standardUserDefaults] setObject:[self lastVersionCheckPerformedOnDate] forKey:HarpyDefaultStoredVersionCheckDate];
                                                         [[NSUserDefaults standardUserDefaults] synchronize];
-                
+                                                        
                                                         /**
                                                          Current version that has been uploaded to the AppStore.
                                                          Used to contain all versions, but now only contains the latest version.
                                                          Still returns an instance of NSArray.
                                                          */
-                                                        NSArray *versionsInAppStore = [[self.appData valueForKey:@"results"] valueForKey:@"version"];
-                
-                                                        if ([versionsInAppStore count]) {
-                                                            _currentAppStoreVersion = [versionsInAppStore objectAtIndex:0];
-                                                            [self checkIfAppStoreVersionIsNewestVersion:_currentAppStoreVersion];
-                                                        }
+//                                                        NSArray *versionsInAppStore = [[self.appData valueForKey:@"results"] valueForKey:@"version"];
+                                                        
+                                                        _currentAppStoreVersion = [[NSString alloc] initWithData:data encoding:NSASCIIStringEncoding];
+                                                        [self checkIfAppStoreVersionIsNewestVersion:_currentAppStoreVersion];
                                                     });
                                                 }
                                             }];
+    
     [task resume];
 }
 
